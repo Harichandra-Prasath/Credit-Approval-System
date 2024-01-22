@@ -66,3 +66,9 @@ class LoanCreateViewTest(TestCase):
     def test_view_loan(self):
         _response = self.client.get(reverse("view_loan",kwargs={"loan_id":1}))
         self.assertEqual(_response.status_code,200)
+    
+    def test_view_loans(self):
+        _response = self.client.get(reverse("view_loans",kwargs={"customer_id":1}))
+        response = json.loads(_response.content)
+        self.assertEqual(_response.status_code,200)
+        self.assertEqual(len(response["Loans"]),1)

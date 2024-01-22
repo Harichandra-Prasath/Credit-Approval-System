@@ -49,3 +49,6 @@ class Loan(models.Model):
             _r_term =  (1+_r)**n
             self.emi = float("%.2f"%(self.amount * (_r*_r_term/(_r_term-1))))
         super().save(*args,**kwargs)
+
+    def repayments_left(self):
+        return self.tenure*12 - self.paid_on_time

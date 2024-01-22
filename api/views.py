@@ -65,12 +65,13 @@ def View_loan(request,loan_id):
     except:
         return Response({"Status":"Error","Message":"Invalid Loan Id. Request not found"},status=404)
     
+    # No need for json dumping as Response does json dumps in the hood
     _customer_details = {
         "first_name": loan.customer.first_name,
         "last_name": loan.customer.last_name,
         "phone_number": int(loan.customer.phone_number) ,
         "age": loan.customer.age
-    }
+    } 
 
     response = {
         "loan_id":loan_id,
@@ -81,3 +82,30 @@ def View_loan(request,loan_id):
         "tenure":loan.tenure
     }
     return Response(response,status=200)
+
+@api_view(["GET"])
+def View_loans(request,customer_id):
+    try:
+        customer = Customer.objects.get(pk=customer_id)
+    except:
+        return Response({"Status":"Error","Message":"Invalid Customer Id.Customer not found"},status=404)
+    
+    loans = customer.loans.all()
+    loan_response = generate_response(loans)
+    return Response({"Loans":loan_response},status=200)
+
+
+# internal function to generate the response for the view_loans
+def generate_response(loans):
+    response = []
+    for loan in loans:
+        _response = {
+            "loan_id":loan.id,
+            "loan_amount":loan.amount,
+            "interest_rate":loan.interest_rate,
+            "monthly_installment":loan.emi,
+            "repayments_left":loan.repayments_left()
+        }
+        response.append(_response)
+    
+    return response

@@ -45,7 +45,7 @@ class LoanModelTest(TestCase):
         loan = Loan(
             customer = customer,
             amount = 10000,
-            tenure = 3,
+            tenure = 36,
             interest_rate=5,
         )
         loan.save()

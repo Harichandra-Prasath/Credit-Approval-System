@@ -27,6 +27,7 @@ class Customer(models.Model):
 
 
 class Loan(models.Model):
+    loan_id = models.IntegerField(null=False,primary_key=True)
     customer = models.ForeignKey(Customer,on_delete=models.CASCADE,related_name="loans")
     amount = models.FloatField(null=False)
     tenure = models.IntegerField(null=False)
@@ -37,18 +38,30 @@ class Loan(models.Model):
     end_date = models.DateField(null=False)
 
     def save(self,*args,**kwargs):
+        # Last_created_id =  Dummy.objects.get(pk=1)
 
+        # if not self.loan_id:
+        #     self.loan_id = Last_created_id.last_max + 1    #no id provided, generate the id with last_max
+        # else:
+        #     if self.loan_id>Last_created_id.last_max:
+        #         Last_created_id.last_max = self.loan_id
+        
         # Calculating the end_date based on tenure 
         if not self.end_date:
-            self.end_date = datetime.date.today() + datetime.timedelta(days=365.2425*self.tenure)
+            self.end_date = datetime.date.today() + datetime.timedelta(days=365.2425*(self.tenure/12))
         
         # Calculating emi using amortization formula
         if not self.emi:
             _r = (self.interest_rate/(12*100))
-            n = self.tenure * 12
+            n = self.tenure
             _r_term =  (1+_r)**n
             self.emi = float("%.2f"%(self.amount * (_r*_r_term/(_r_term-1))))
         super().save(*args,**kwargs)
 
     def repayments_left(self):
         return self.tenure*12 - self.paid_on_time
+
+
+# Due to random ids in loan_data 
+class Dummy(models.Model):
+    last_max = models.IntegerField(default=0)     #Dummy model to keep track of max_id

@@ -40,7 +40,7 @@ class LoanCreateViewTest(TestCase):
         loan = Loan(
             customer = customer,
             amount = 10000,
-            tenure = 3,
+            tenure = 36,
             interest_rate=5,
         )
         loan.save()
@@ -49,7 +49,7 @@ class LoanCreateViewTest(TestCase):
         post = {
             "customer_id":1,
             "loan_amount": 10000,
-            "tenure": 3,
+            "tenure": 36,
             "interest_rate":5
         }
         response_exp = {

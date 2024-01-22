@@ -1,5 +1,5 @@
 # Additional file to handle model creations and to handle errors
-from .models import *
+from .models import Customer,Loan
 
 def create_Customer_instance(data):
     try:

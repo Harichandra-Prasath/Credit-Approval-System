@@ -1,3 +1,5 @@
+# File containing all the response templates
+
 
 # Response template for the Register View
 def Register_response(customer):

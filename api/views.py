@@ -90,6 +90,7 @@ def Check_eligibility(request):
     except:
         return Response({"Status":"Error","Message":"Error Fetching Customer. Check your request body"},status=400)
 
+    # Temporary loan instance to get the emi
     loan = Loan(
             customer= customer,
             amount= post_data["loan_amount"],
@@ -97,5 +98,7 @@ def Check_eligibility(request):
             tenure = post_data["tenure"]
         )
     eligible,interest,_ = is_eligible(customer)
+
+    
     response = Eligible_response(post_data,eligible,interest,loan.get_emi())
     return Response(response,status=200)

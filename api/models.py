@@ -58,8 +58,8 @@ class Loan(models.Model):
             self.emi = self.get_emi()
         super().save(*args,**kwargs)
 
-    def repayments_left(self):
-        return self.tenure*12 - self.paid_on_time
+    def repayments_left(self):     # get repayments
+        return self.tenure - self.paid_on_time
     
     def get_emi(self):
         _r = (self.interest_rate/(12*100))

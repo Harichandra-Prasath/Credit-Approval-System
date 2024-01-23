@@ -81,6 +81,7 @@ def is_eligible(customer):
     else:
          credit_score+=20
     
+    # Following the credit-system
     if credit_score>50:
          return True,None,"Loan Approved.Approved for requested interest rate"
     elif 30<credit_score<50:

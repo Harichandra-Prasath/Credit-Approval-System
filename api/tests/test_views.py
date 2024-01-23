@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 import json
 from api.models import Customer,Loan
+from api.utils import is_eligible
 
 class RegisterViewTest(TestCase):
 
@@ -72,3 +73,57 @@ class LoanCreateViewTest(TestCase):
         response = json.loads(_response.content)
         self.assertEqual(_response.status_code,200)
         self.assertEqual(len(response["Loans"]),1)
+
+
+class CheckEligibleTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        customer = Customer(
+            first_name="hari",
+            last_name = "prasath",
+            phone_number = "9789878909",
+            monthly_salary = 47000,
+            age = 25
+        )
+        customer.save()
+    
+    def test_no_approval(self):
+        customer = Customer.objects.get(pk=1)
+        loan = Loan(
+            customer = customer,
+            amount = 1000000,
+            tenure = 36,
+            interest_rate=0.05,
+        )
+        loan.save()
+        loan2 = Loan(
+            customer = customer,
+            amount = 900000,
+            tenure = 36,
+            interest_rate=0.05,
+        )
+        loan2.save()
+        eligible,_ = is_eligible(customer)
+        self.assertFalse(eligible)
+
+    def test_approval(self):
+        customer = Customer.objects.get(pk=1)
+        loan = Loan(
+            customer = customer,
+            amount = 500000,
+            tenure = 50,
+            interest_rate=0.005,
+        )
+        loan.paid_on_time = 45
+        loan.save()
+        loan2 = Loan(
+            customer = customer,
+            amount = 500000,
+            tenure = 50,
+            interest_rate=0.005,
+        )
+        loan2.paid_on_time = 45
+        loan2.save()
+        eligible,_  = is_eligible(customer)
+        self.assertTrue(eligible)
+        self.assertEqual(_,None)

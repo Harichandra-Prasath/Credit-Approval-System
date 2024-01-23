@@ -19,13 +19,13 @@ def is_eligible(customer):
     for loan in loans:
          total_emis+= loan.emi
     if total_emis>customer.monthly_salary*0.5:
-         return False,None
+         return False,None,"Current Emi exceeds 50 percent of monthly salary"
 
     # Sum of current loans vs approved limit
     for loan in loans:
         total_loan+= loan.amount
     if total_loan>customer.approved_limit:
-        return False    
+        return False,None,"Total Loan amount exceeds Approved limit"    
     else:
         if total_loan<(customer.approved_limit*0.3):    # less than 30% , full score
             credit_score+= 20
@@ -82,10 +82,10 @@ def is_eligible(customer):
          credit_score+=20
     
     if credit_score>50:
-         return True,None
+         return True,None,"Loan Approved.Approved for requested interest rate"
     elif 30<credit_score<50:
-         return True,12
+         return True,12,"Loan Approved. Approved with 12 percent interest rate"
     elif 10<credit_score<30:
-         return True,16
+         return True,16,"Loan Approved. Approved with 16 percent interest rate"
     else:
-         return False,None
+         return False,None,"Credit Score less than 10"

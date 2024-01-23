@@ -55,15 +55,17 @@ class Loan(models.Model):
         
         # Calculating emi using amortization formula
         if not self.emi:
-            _r = (self.interest_rate/(12*100))
-            n = self.tenure
-            _r_term =  (1+_r)**n
-            self.emi = float("%.2f"%(self.amount * (_r*_r_term/(_r_term-1))))
+            self.emi = self.get_emi()
         super().save(*args,**kwargs)
 
     def repayments_left(self):
         return self.tenure*12 - self.paid_on_time
-
+    
+    def get_emi(self):
+        _r = (self.interest_rate/(12*100))
+        n = self.tenure
+        _r_term =  (1+_r)**n
+        return float("%.2f"%(self.amount * (_r*_r_term/(_r_term-1))))
 
 # Due to random ids in loan_data 
 class Dummy(models.Model):

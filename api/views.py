@@ -1,10 +1,9 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Customer,Loan
-from .response import create_loan_response,Register_response,view_loan_response
-from .utils import generate_response
+from .response import create_loan_response,Register_response,view_loan_response,Eligible_response,failed_loan_response
+from .utils import generate_response,is_eligible
 from .create import create_Customer_instance,create_Loan_instance
-
 
 
 
@@ -37,14 +36,24 @@ def Create_loan(request):
     except:
         return Response({"Status":"Error","Message":"Error Fetching Customer. Check your request body"},status=400)
 
+    elgible,interest,message = is_eligible(customer)
+    if not interest:
+        try:
+            interest = post_data['interest_rate']
+        except:
+             return Response({"Status":"Error","Message":"Bad request.Check your request body"},status=400)
     # Success indicates successful Loan creation
-    success,loan = create_Loan_instance(post_data,customer)
-
-    if success:
-        response = create_loan_response(loan)
-        return Response(response,status=200)
+    if elgible:
+        success,loan = create_Loan_instance(post_data,customer,interest)
+        if success:
+            response = create_loan_response(loan,message)
+            return Response(response,status=200)
+        else:
+            return Response({"Status":"Error","Message":"Bad request.Check your request body"},status=400)
     else:
-        return Response({"Status":"Error","Message":"Bad request.Check your request body"},status=400)
+        response = failed_loan_response(customer,message)
+        return Response(response,status=200)
+    
     
 
 @api_view(["GET"])
@@ -75,4 +84,18 @@ def View_loans(request,customer_id):
 
 @api_view(["POST"])
 def Check_eligibility(request):
-    pass
+    post_data = request.data
+    try:
+        customer = Customer.objects.get(pk=post_data["customer_id"])
+    except:
+        return Response({"Status":"Error","Message":"Error Fetching Customer. Check your request body"},status=400)
+
+    loan = Loan(
+            customer= customer,
+            amount= post_data["loan_amount"],
+            interest_rate = post_data["interest_rate"],
+            tenure = post_data["tenure"]
+        )
+    eligible,interest,_ = is_eligible(customer)
+    response = Eligible_response(post_data,eligible,interest,loan.get_emi())
+    return Response(response,status=200)

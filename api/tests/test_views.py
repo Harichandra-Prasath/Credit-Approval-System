@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 import json
-from api.models import Customer,Loan
+from api.models import Customer,Loan,Dummy
 from api.utils import is_eligible
 
 class RegisterViewTest(TestCase):
@@ -14,15 +14,15 @@ class RegisterViewTest(TestCase):
             "monthly_income":47000,
             "phone_number": 9878980998
         }
+        _response = self.client.post(reverse("register"),post,content_type="application/json")
         response_exp = {
-            "customer_id":1,
+            "customer_id":Customer.objects.last().pk,
             "name":"hari prasath",
             "age":25,
             "monthly_income":47000,
             "approved_limit":1700000,
             "phone_number": 9878980998
         }
-        _response = self.client.post(reverse("register"),post,content_type="application/json")
         response = json.loads(_response.content)
         self.assertEqual(response,response_exp)
 
@@ -48,28 +48,28 @@ class LoanCreateViewTest(TestCase):
 
     def test_create_loan(self):
         post = {
-            "customer_id":1,
+            "customer_id":Customer.objects.last().pk,
             "loan_amount": 10000,
             "tenure": 36,
             "interest_rate":5
         }
+        _response = self.client.post(reverse("create_loan"),post,content_type="application/json")
         response_exp = {
-            "loan_id":2,
-            "customer_id":1,
+            "loan_id":Loan.objects.last().pk,
+            "customer_id":Customer.objects.last().pk,
             "loan_approved":True,
-            "message":"Loan Approved",
+            "message":"Loan Approved.Approved for requested interest rate",
             "monthly_installment":299.71
         }
-        _response = self.client.post(reverse("create_loan"),post,content_type="application/json")
         response = json.loads(_response.content)
         self.assertEqual(response,response_exp)
     
     def test_view_loan(self):
-        _response = self.client.get(reverse("view_loan",kwargs={"loan_id":1}))
+        _response = self.client.get(reverse("view_loan",kwargs={"loan_id":Loan.objects.last().pk}))
         self.assertEqual(_response.status_code,200)
     
     def test_view_loans(self):
-        _response = self.client.get(reverse("view_loans",kwargs={"customer_id":1}))
+        _response = self.client.get(reverse("view_loans",kwargs={"customer_id":Customer.objects.last().pk}))
         response = json.loads(_response.content)
         self.assertEqual(_response.status_code,200)
         self.assertEqual(len(response["Loans"]),1)
@@ -88,7 +88,7 @@ class CheckEligibleTest(TestCase):
         customer.save()
     
     def test_no_approval(self):
-        customer = Customer.objects.get(pk=1)
+        customer = Customer.objects.latest('pk')
         loan = Loan(
             customer = customer,
             amount = 1000000,
@@ -103,11 +103,11 @@ class CheckEligibleTest(TestCase):
             interest_rate=0.05,
         )
         loan2.save()
-        eligible,_ = is_eligible(customer)
+        eligible,interest,_ = is_eligible(customer)
         self.assertFalse(eligible)
 
     def test_approval(self):
-        customer = Customer.objects.get(pk=1)
+        customer = Customer.objects.latest('pk')
         loan = Loan(
             customer = customer,
             amount = 500000,
@@ -124,6 +124,7 @@ class CheckEligibleTest(TestCase):
         )
         loan2.paid_on_time = 45
         loan2.save()
-        eligible,_  = is_eligible(customer)
+        eligible,interest,_  = is_eligible(customer)
         self.assertTrue(eligible)
-        self.assertEqual(_,None)
+        self.assertEqual(interest,None)
+

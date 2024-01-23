@@ -1,6 +1,6 @@
 .venv
 __pycache__
+.gitignore
 .env
-db.sqlite3
+.git
 migrations
-README.md

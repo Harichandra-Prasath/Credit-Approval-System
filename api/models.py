@@ -40,7 +40,7 @@ class Loan(models.Model):
     def save(self,*args,**kwargs):
         if Dummy.objects.count()==0:
             Dummy.objects.create().save()
-        Last_created_id =  Dummy.objects.get(pk=1)
+        Last_created_id =  Dummy.objects.last()
         if not self.loan_id:
             self.loan_id = Last_created_id.last_max + 1    #no id provided, generate the id with last_max
             Last_created_id.last_max +=1

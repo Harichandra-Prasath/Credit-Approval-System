@@ -45,7 +45,7 @@ def view_loan_response(loan):
 # Response template for view-loans individual elements 
 def view_loans_element_response(loan):
     return {
-            "loan_id":loan.id,
+            "loan_id":loan.pk,
             "loan_amount":loan.amount,
             "interest_rate":loan.interest_rate,
             "monthly_installment":loan.emi,

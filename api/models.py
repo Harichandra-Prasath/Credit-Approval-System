@@ -34,18 +34,21 @@ class Loan(models.Model):
     interest_rate = models.FloatField(null=False)
     emi = models.FloatField(null=False)
     paid_on_time = models.IntegerField(null=False,default=0)
-    start_date = models.DateField(auto_now_add=True)
+    start_date = models.DateField(null=False,default=datetime.date.today)
     end_date = models.DateField(null=False)
 
     def save(self,*args,**kwargs):
-        # Last_created_id =  Dummy.objects.get(pk=1)
-
-        # if not self.loan_id:
-        #     self.loan_id = Last_created_id.last_max + 1    #no id provided, generate the id with last_max
-        # else:
-        #     if self.loan_id>Last_created_id.last_max:
-        #         Last_created_id.last_max = self.loan_id
-        
+        if Dummy.objects.count()==0:
+            Dummy.objects.create().save()
+        Last_created_id =  Dummy.objects.get(pk=1)
+        if not self.loan_id:
+            self.loan_id = Last_created_id.last_max + 1    #no id provided, generate the id with last_max
+            Last_created_id.last_max +=1
+            Last_created_id.save()
+        else:
+            if self.loan_id>Last_created_id.last_max:
+                Last_created_id.last_max = self.loan_id
+                Last_created_id.save()
         # Calculating the end_date based on tenure 
         if not self.end_date:
             self.end_date = datetime.date.today() + datetime.timedelta(days=365.2425*(self.tenure/12))

@@ -16,7 +16,7 @@ def create_Customer_instance(data):
         return False,None
 
 def create_Loan_instance(data,customer):
-    try:
+
         loan = Loan(
             customer= customer,
             amount= data["loan_amount"],
@@ -25,5 +25,3 @@ def create_Loan_instance(data,customer):
         )
         loan.save()
         return True,loan
-    except:
-        return False,None

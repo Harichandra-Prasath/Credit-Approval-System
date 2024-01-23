@@ -1,13 +1,11 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Customer,Loan,Dummy
+from .models import Customer,Loan
 from .response import create_loan_response,Register_response,view_loan_response
 from .utils import generate_response
 from .create import create_Customer_instance,create_Loan_instance
 
-# Create your views here.
-dummy = Dummy.objects.create()
-dummy.save()
+
 
 
 
@@ -74,3 +72,7 @@ def View_loans(request,customer_id):
     loan_response = generate_response(loans) 
     
     return Response({"Loans":loan_response},status=200)
+
+@api_view(["POST"])
+def Check_eligibility(request):
+    pass
